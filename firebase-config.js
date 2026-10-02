@@ -11,5 +11,5 @@ window.DAILY_FIREBASE_CONFIG = {
 // Chave pública de site do reCAPTCHA Enterprise (Web, baseada em pontuação).
 // Cadastre apenas o domínio publicado; não cadastre localhost nem use tokens de debug.
 window.DAILY_APP_CHECK_CONFIG = {
-  siteKey: '6LfPsdstAAAAAFpKuPPm77yFOqkTBnwWToeKt_uE'
+  siteKey: '6LfGqNstAAAAALIazcsSeCxdKnkgq3xcLFpAnRQx'
 };
