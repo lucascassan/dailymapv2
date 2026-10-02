@@ -1,0 +1,35 @@
+# Dependências e caches
+node_modules/
+.firebase/
+.cache/
+
+# Arquivos temporários e logs
+tmp/
+*.log
+*.tmp
+*.bak
+
+# Credenciais locais
+.env
+.env.*
+!.env.example
+*service-account*.json
+*serviceAccount*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
+
+# Resultados de testes
+playwright-report/
+test-results/
+coverage/
+
+# Exportações locais (mantenha dados reais fora do repositório)
+exports/
+mapa-daily.json
+daily_*.pdf
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
