@@ -171,6 +171,8 @@
   $('session-dialog').addEventListener('cancel',event=>event.preventDefault());
   $('session-create-open').onclick=()=>{$('session-create-message').textContent='';$('session-create-dialog').showModal();$('session-meet').focus()};
   $('session-create-cancel').onclick=()=>$('session-create-dialog').close();
+  $('session-map-choose').onclick=()=>$('session-map-file').click();
+  $('session-map-file').addEventListener('change',()=>{const name=$('session-map-file').files[0]?.name;const label=$('session-map-filename');label.textContent=name||'Nenhum arquivo selecionado';label.title=name||''});
   function meetingUrl(value) {
     try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='meet.google.com'&&!url.username&&!url.password&&url.pathname!=='/'?url.href:''}catch{return ''}
   }
