@@ -16,7 +16,7 @@ Documentação: [SDK Web](https://firebase.google.com/docs/web/setup), [autentic
 ## Uso
 
 - **Criar sessão** começa um mapa vazio e fornece um código de 4 caracteres com letras maiúsculas e números. O criador é o dono.
-- **Entrar** recebe o mapa atual e acompanha posições, tamanhos, fontes, cor de fundo, membros, departamentos, alocações e tarefas. Edição é bloqueada pela interface e pelas regras do banco.
+- **Entrar** pede o nome do visitante. Ele vê o mapa inteiro e clica em uma área para informar os números dos cards/tarefas em um diálogo. O dono continua editando o mapa completo.
 - Compartilhe o código usando **Copiar código**. Quem souber o código poderá visualizar a sessão.
 - O dono pode importar JSON, editar normalmente e exportar JSON/PDF. A sincronização online preserva alocações e tarefas por área; a exportação JSON mantém o comportamento anterior de omitir as alocações.
 - Zoom e maximização são individuais. As posições são proporcionais à tela e podem ser ajustadas para caber em telas diferentes.
@@ -33,7 +33,7 @@ Durante o arraste há no máximo quatro snapshots por segundo. O volume transmit
 
 ## Validação
 
-`node --check app.js`, `node --check online.js` e `node --check firebase-client.js` verificam a sintaxe. `node tests/online.test.cjs` exercita a interface com um transporte simulado: dono, dois visitantes, permissões, atualizações, reconexão e isolamento do mapa local. Requer Playwright e Edge instalados; configure `PLAYWRIGHT_MODULE` se necessário.
+`node --check app.js`, `node --check online.js` e `node --check firebase-client.js` verificam a sintaxe. `node --check visitor-flow.js` verifica o novo fluxo. A interface foi exercitada com Firebase simulado em Edge: nome obrigatório, dois visitantes, filtro individual, tarefas múltiplas, finalização, liberação do Meet e encerramento.
 
 Após configurar o Firebase, valide em três navegadores/perfis diferentes. No Rules Playground, confirme: leitura de uma sessão específica autenticada permitida; leitura de `/sessions` negada; criação com o próprio UID permitida; escrita por outro UID, mudança de dono e escrita em sessão encerrada negadas. O teste simulado não substitui essa verificação das regras publicadas.
 
@@ -57,4 +57,20 @@ Sem a chave de site e sem acesso ao console, a integração pode ser testada com
 
 Documentação: [Configurar reCAPTCHA Enterprise](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider), [ativar obrigatoriedade](https://firebase.google.com/docs/app-check/enable-enforcement), [tokens de depuração](https://firebase.google.com/docs/app-check/web/debug-provider).
 
-Execute `node --test tests/app-check.test.cjs` para verificar configuração obrigatória, inicialização, renovação automática, falha de token e nova tentativa.
+Valide o App Check no domínio publicado antes de testar sessões com a base real.
+
+## Meet e link de convite
+
+Ao criar uma sessão, informe um link HTTPS do Google Meet. Ele fica salvo separadamente do mapa e aparece em Abrir Meet para o dono. Para visitantes, só é liberado após Finalizar. Copiar convite copia o endereço do site com `?sessao=AB12`; o convite preenche o código no diálogo para entrar. O convite não concede edição a visitantes nem reabre sessões encerradas. O link do Meet permanece associado à sessão mesmo após importar outro mapa.
+
+## Depuração temporária em localhost
+
+Para testar o modo online localmente, execute no console do navegador `localStorage.setItem('daily-app-check-debug', 'true'); location.reload();`. Tente criar uma sessão, copie o token exibido no console e cadastre em Firebase → App Check → Apps → Gerenciar tokens de depuração. Essa opção funciona somente em localhost, 127.0.0.1 ou ::1 e precisa ser ativada explicitamente em cada navegador. Não inclui nenhum token no código. Para desativar, execute `localStorage.removeItem('daily-app-check-debug'); location.reload();` e exclua o token no console Firebase.
+
+Para usar um token de depuração já cadastrado, preencha `window.DAILY_LOCAL_APP_CHECK_DEBUG_TOKEN` em `app-check.local.js`. Esse arquivo está no .gitignore e só é carregado em localhost, 127.0.0.1 ou ::1, antes do SDK Firebase. Ele tem prioridade sobre a opção de gerar token automaticamente. Nunca publique esse arquivo.
+
+## Atuação dos visitantes
+
+Visitantes informam o nome ao entrar, veem o mapa inteiro e clicam nas áreas onde atuam para registrar os números dos cards/tarefas separados por vírgula em um diálogo. Ao Finalizar, a atuação é enviada ao dono e o Meet é liberado. É permitido finalizar sem selecionar área quando não há atuação a registrar. A atuação finalizada fica bloqueada para edição.
+
+Republique `database.rules.json` antes de usar: `dailyParticipants/<codigo>/<uid>` permite que cada visitante escreva somente seu próprio registro; somente o dono pode ler todos. `meetingLinks/<codigo>` libera leitura apenas ao dono ou a um visitante finalizado. O link não faz parte do snapshot compartilhado em sessões novas. Para sessões antigas que tinham o Meet no snapshot, crie uma nova sessão para usar a proteção nova.

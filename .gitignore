@@ -33,3 +33,6 @@ daily_*.pdf
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Token privado de depuração do App Check
+app-check.local.js

@@ -7,12 +7,56 @@
         ".read": "auth != null && $code.matches(/^([A-Z0-9]{4}|[0-9]{12})$/)",
         ".write": "auth != null && $code.matches(/^([A-Z0-9]{4}|[0-9]{12})$/) && ((!data.exists() && $code.matches(/^[A-Z0-9]{4}$/) && newData.child('owner').val() === auth.uid) || (data.child('owner').val() === auth.uid && newData.child('owner').val() === auth.uid && !data.child('closedAt').exists()))",
         ".validate": "newData.hasChildren(['owner', 'createdAt', 'updatedAt', 'payload'])",
-        "owner": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
-        "createdAt": { ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())" },
-        "updatedAt": { ".validate": "newData.isNumber()" },
-        "closedAt": { ".validate": "newData.isNumber() && newData.val() <= now" },
-        "payload": { ".validate": "newData.isString() && newData.val().length <= 5000000" },
-        "$other": { ".validate": false }
+        "owner": {
+          ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "closedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "payload": {
+          ".validate": "newData.isString() && newData.val().length <= 5000000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "dailyParticipants": {
+      "$code": {
+        ".read": "auth != null && root.child('sessions').child($code).child('owner').val() === auth.uid",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && root.child('sessions').child($code).exists() && !root.child('sessions').child($code).child('closedAt').exists() && (!data.exists() || data.child('finalized').val() !== true)",
+          ".validate": "newData.hasChildren(['name','tasksJson','finalized','updatedAt'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+          },
+          "tasksJson": {
+            ".validate": "newData.isString() && newData.val().length <= 50000"
+          },
+          "finalized": {
+            ".validate": "newData.isBoolean()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "meetingLinks": {
+      "$code": {
+        ".read": "auth != null && !root.child('sessions').child($code).child('closedAt').exists() && (root.child('sessions').child($code).child('owner').val() === auth.uid || root.child('dailyParticipants').child($code).child(auth.uid).child('finalized').val() === true)",
+        ".write": "auth != null && root.child('sessions').child($code).child('owner').val() === auth.uid && !root.child('sessions').child($code).child('closedAt').exists()",
+        ".validate": "newData.isString() && newData.val().beginsWith('https://meet.google.com/') && newData.val().length <= 2048"
       }
     }
   }
