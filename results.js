@@ -10,7 +10,7 @@ window.DailyResults = (() => {
       const ids = [...new Set(state.assignments[employee.id] || [])];
       const activities = ids.filter(id => areas.has(id)).map(id => ({
         area: clean(areas.get(id).name),
-        tasks: [...new Set(employee.tasksByArea?.[id] || (ids.length === 1 ? employee.taskNumbers || [] : []))].map(clean),
+        tasks: [...new Set(employee.tasksByArea?.[id] || (ids.length === 1 ? employee.taskNumbers || [] : []))].map(card=>clean(window.DailyCards?.label(card,!document.body.classList.contains('visitor-reporting'))??card)),
       }));
       return {
         name: clean(employee.name),
